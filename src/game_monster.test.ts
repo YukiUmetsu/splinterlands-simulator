@@ -259,8 +259,7 @@ describe('GameMonster', () => {
       expect(allDebuffs.size).toBe(0);
     });
 
-    // https://github.com/thechungster/splinterlands-simulator/issues/78
-    it('cleanse remove all cripples and gains health back', () => {
+    it('cleanse should not remove cripples', () => {
       monster.addDebuff(Ability.CRIPPLE);
       monster.addDebuff(Ability.CRIPPLE);
       monster.addDebuff(Ability.CRIPPLE);
@@ -269,8 +268,8 @@ describe('GameMonster', () => {
       expect(monster.getDebuffAmt(Ability.CRIPPLE)).toBe(3);
       monster.cleanseDebuffs();
 
-      expect(monster.health).toBe(DEFAULT_MONSTER_STAT);
-      expect(monster.getDebuffAmt(Ability.CRIPPLE)).toBe(0);
+      expect(monster.health).toBe(DEFAULT_MONSTER_STAT - 3);
+      expect(monster.getDebuffAmt(Ability.CRIPPLE)).toBe(3);
     });
 
     it('adding weaken removes a health', () => {
@@ -541,6 +540,33 @@ describe('GameMonster', () => {
       monster.health = 0;
       monster.resurrect();
       expect(monster.armor).toBe(PROTECT_AMOUNT);
+    });
+
+    it('resurrect does not remove MONSTER_DEBUFF_ABILITIES debuffs', () => {
+      monster.setHealth(DEFAULT_MONSTER_STAT);
+      monster.addDebuff(Ability.DEMORALIZE);
+      monster.addDebuff(Ability.WEAKEN);
+      monster.addDebuff(Ability.SLOW);
+      monster.addDebuff(Ability.RUST);
+
+      monster.setHealth(0);
+      monster.resurrect();
+      expect(monster.hasDebuff(Ability.DEMORALIZE)).toBe(true);
+      expect(monster.hasDebuff(Ability.WEAKEN)).toBe(true);
+      expect(monster.hasDebuff(Ability.SLOW)).toBe(true);
+      expect(monster.hasDebuff(Ability.RUST)).toBe(true);
+    });
+
+    it('resurrect removes non MONSTER_DEBUFF_ABILITIES debuffs', () => {
+      monster.addDebuff(Ability.POISON);
+      monster.addDebuff(Ability.AFFLICTION);
+      monster.addDebuff(Ability.HALVING);
+      monster.addDebuff(Ability.STUN);
+      monster.resurrect();
+      expect(monster.hasDebuff(Ability.POISON)).toBe(false);
+      expect(monster.hasDebuff(Ability.AFFLICTION)).toBe(false);
+      expect(monster.hasDebuff(Ability.HALVING)).toBe(false);
+      expect(monster.hasDebuff(Ability.STUN)).toBe(false);
     });
   });
 

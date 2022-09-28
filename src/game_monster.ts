@@ -2,6 +2,7 @@ import { GameCard } from './game_card';
 import { Ability, AttackType } from './types';
 import * as abilityUtils from './utils/ability_utils';
 import { CardDetail } from './types';
+import { MONSTER_DEBUFF_ABILITIES } from './utils/ability_utils';
 
 export class GameMonster extends GameCard {
   // Should be set when put in a team.
@@ -180,6 +181,15 @@ export class GameMonster extends GameCard {
     for (let i = 0; i < debuffAmt; i++) {
       this.removeDebuff(debuff);
     }
+  }
+
+  cleanseDebuffsAfterResurrect() {
+    this.debuffsMap.forEach((_, debuff) => {
+      if (!MONSTER_DEBUFF_ABILITIES.includes(debuff)) {
+        console.log(this);
+        this.removeAllDebuff(debuff);
+      }
+    }, this);
   }
 
   cleanseDebuffs() {
@@ -484,7 +494,7 @@ export class GameMonster extends GameCard {
       this.addAbility(Ability.DIVINE_SHIELD);
     }
     this.armor = this.getPostAbilityMaxArmor();
-    this.cleanseDebuffs();
+    this.cleanseDebuffsAfterResurrect();
   }
 
   public getCleanCard(): GameMonster {
